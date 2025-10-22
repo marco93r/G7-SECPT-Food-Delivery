@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Food Delivery – Checks</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <div class="brand">
+        <span class="logo">🛡️</span>
+        <h1>Checks</h1>
+      </div>
+      <nav class="nav">
+        <a href="/">Bestellen</a>
+        <a href="/checks.html" class="active">Checks</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="auth">
+      <h2>API‑Key</h2>
+      <div class="row">
+        <input id="apiKey" type="text" placeholder="X-API-Key" />
+        <button id="saveKey" class="ghost">Speichern</button>
+        <span id="keyStatus" class="muted"></span>
+      </div>
+    </section>
+
+    <section>
+      <h2>Health Checks</h2>
+      <div class="row">
+        <button id="checkWaf">WAF /healthz</button>
+        <button id="checkOrders">Orders /api/orders/healthz</button>
+        <button id="checkRestaurants">Restaurants /api/restaurants/healthz</button>
+        <button id="checkPayments">Payments /api/payments/healthz</button>
+      </div>
+      <pre id="healthOut" class="result"></pre>
+    </section>
+
+    <section>
+      <h2>API Checks</h2>
+      <div class="row">
+        <button id="checkMenus">GET /api/restaurants/menus</button>
+        <button id="testOrder">POST /api/orders/orders (Demo)</button>
+      </div>
+      <pre id="apiOut" class="result"></pre>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <small>Diagnose‑/Testseite</small>
+  </footer>
+
+  <script src="/checks.js"></script>
+</body>
+</html>
+

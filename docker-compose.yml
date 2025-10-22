@@ -1,0 +1,60 @@
+services:
+  frontend:
+    build: ./frontend
+    networks: [backend]
+
+  order-service:
+    build: ./services/order-service
+    environment:
+      - API_KEY=${API_KEY:-changeme}
+      - RESTAURANT_URL=http://restaurant-service:8001
+      - PAYMENT_URL=http://payment-service:8002
+      - DB_PATH=/data/order.db
+    volumes:
+      - order_data:/data
+    networks: [backend]
+
+  restaurant-service:
+    build: ./services/restaurant-service
+    environment:
+      - API_KEY=${API_KEY:-changeme}
+      - DB_PATH=/data/restaurant.db
+    volumes:
+      - restaurant_data:/data
+    networks: [backend]
+
+  payment-service:
+    build: ./services/payment-service
+    environment:
+      - API_KEY=${API_KEY:-changeme}
+      - DB_PATH=/data/payment.db
+      - PAYMENT_FAIL_AUTHORIZE=${PAYMENT_FAIL_AUTHORIZE:-false}
+    volumes:
+      - payment_data:/data
+    networks: [backend]
+
+  api-gateway:
+    build: ./api-gateway
+    depends_on: [order-service, restaurant-service, payment-service]
+    environment:
+      - API_KEY=${API_KEY:-changeme}
+    ports:
+      - "8081:8080"
+    networks: [backend]
+
+  waf:
+    build: ./waf
+    depends_on: [frontend, api-gateway]
+    user: "0:0"
+    ports:
+      - "8080:80"
+      - "8443:443"
+    networks: [backend]
+
+volumes:
+  order_data:
+  restaurant_data:
+  payment_data:
+
+networks:
+  backend:

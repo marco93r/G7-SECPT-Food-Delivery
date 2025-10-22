@@ -1,0 +1,7 @@
+version: "3.9"
+
+services:
+  payment-service:
+    environment:
+      - PAYMENT_FAIL_AUTHORIZE=true
+
