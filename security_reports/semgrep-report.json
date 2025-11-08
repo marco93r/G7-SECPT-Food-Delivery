@@ -1,0 +1,471 @@
+{
+  "version": "1.142.1",
+  "results": [
+    {
+      "check_id": "generic.nginx.security.request-host-used.request-host-used",
+      "path": "deploy/gateway/nginx.conf",
+      "start": {
+        "line": 24,
+        "col": 35,
+        "offset": 616
+      },
+      "end": {
+        "line": 24,
+        "col": 40,
+        "offset": 621
+      },
+      "extra": {
+        "message": "'$http_host' and '$host' variables may contain a malicious value from attacker controlled 'Host' request header. Use an explicitly configured host value or a allow list for validation.",
+        "metadata": {
+          "cwe": [
+            "CWE-290: Authentication Bypass by Spoofing"
+          ],
+          "references": [
+            "https://github.com/yandex/gixy/blob/master/docs/en/plugins/hostspoofing.md",
+            "https://portswigger.net/web-security/host-header"
+          ],
+          "category": "security",
+          "technology": [
+            "nginx"
+          ],
+          "confidence": "MEDIUM",
+          "owasp": [
+            "A07:2021 - Identification and Authentication Failures"
+          ],
+          "subcategory": [
+            "audit"
+          ],
+          "likelihood": "LOW",
+          "impact": "LOW",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Improper Authentication"
+          ],
+          "source": "https://semgrep.dev/r/generic.nginx.security.request-host-used.request-host-used",
+          "shortlink": "https://sg.run/4x3Z"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "generic.nginx.security.request-host-used.request-host-used",
+      "path": "deploy/waf/nginx.conf",
+      "start": {
+        "line": 36,
+        "col": 35,
+        "offset": 872
+      },
+      "end": {
+        "line": 36,
+        "col": 40,
+        "offset": 877
+      },
+      "extra": {
+        "message": "'$http_host' and '$host' variables may contain a malicious value from attacker controlled 'Host' request header. Use an explicitly configured host value or a allow list for validation.",
+        "metadata": {
+          "cwe": [
+            "CWE-290: Authentication Bypass by Spoofing"
+          ],
+          "references": [
+            "https://github.com/yandex/gixy/blob/master/docs/en/plugins/hostspoofing.md",
+            "https://portswigger.net/web-security/host-header"
+          ],
+          "category": "security",
+          "technology": [
+            "nginx"
+          ],
+          "confidence": "MEDIUM",
+          "owasp": [
+            "A07:2021 - Identification and Authentication Failures"
+          ],
+          "subcategory": [
+            "audit"
+          ],
+          "likelihood": "LOW",
+          "impact": "LOW",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Improper Authentication"
+          ],
+          "source": "https://semgrep.dev/r/generic.nginx.security.request-host-used.request-host-used",
+          "shortlink": "https://sg.run/4x3Z"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "dockerfile.security.missing-user.missing-user",
+      "path": "services/frontend/Dockerfile",
+      "start": {
+        "line": 23,
+        "col": 1,
+        "offset": 381
+      },
+      "end": {
+        "line": 23,
+        "col": 35,
+        "offset": 415
+      },
+      "extra": {
+        "message": "By not specifying a USER, a program in the container may run as 'root'. This is a security hazard. If an attacker can control a process running as root, they may have control over the container. Ensure that the last USER in a Dockerfile is a USER other than 'root'.",
+        "fix": "USER non-root\nCMD [\"nginx\", \"-g\", \"daemon off;\"]",
+        "metadata": {
+          "cwe": [
+            "CWE-250: Execution with Unnecessary Privileges"
+          ],
+          "category": "security",
+          "technology": [
+            "dockerfile"
+          ],
+          "confidence": "MEDIUM",
+          "owasp": [
+            "A04:2021 - Insecure Design"
+          ],
+          "references": [
+            "https://owasp.org/Top10/A04_2021-Insecure_Design"
+          ],
+          "subcategory": [
+            "audit"
+          ],
+          "likelihood": "LOW",
+          "impact": "MEDIUM",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Improper Authorization"
+          ],
+          "source": "https://semgrep.dev/r/dockerfile.security.missing-user.missing-user",
+          "shortlink": "https://sg.run/Gbvn"
+        },
+        "severity": "ERROR",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "dockerfile.security.missing-user.missing-user",
+      "path": "services/order-service/Dockerfile",
+      "start": {
+        "line": 20,
+        "col": 1,
+        "offset": 362
+      },
+      "end": {
+        "line": 20,
+        "col": 67,
+        "offset": 428
+      },
+      "extra": {
+        "message": "By not specifying a USER, a program in the container may run as 'root'. This is a security hazard. If an attacker can control a process running as root, they may have control over the container. Ensure that the last USER in a Dockerfile is a USER other than 'root'.",
+        "fix": "USER non-root\nCMD [\"uvicorn\", \"main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8081\"]",
+        "metadata": {
+          "cwe": [
+            "CWE-250: Execution with Unnecessary Privileges"
+          ],
+          "category": "security",
+          "technology": [
+            "dockerfile"
+          ],
+          "confidence": "MEDIUM",
+          "owasp": [
+            "A04:2021 - Insecure Design"
+          ],
+          "references": [
+            "https://owasp.org/Top10/A04_2021-Insecure_Design"
+          ],
+          "subcategory": [
+            "audit"
+          ],
+          "likelihood": "LOW",
+          "impact": "MEDIUM",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Improper Authorization"
+          ],
+          "source": "https://semgrep.dev/r/dockerfile.security.missing-user.missing-user",
+          "shortlink": "https://sg.run/Gbvn"
+        },
+        "severity": "ERROR",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "dockerfile.security.missing-user.missing-user",
+      "path": "services/payment-service/Dockerfile",
+      "start": {
+        "line": 20,
+        "col": 1,
+        "offset": 362
+      },
+      "end": {
+        "line": 20,
+        "col": 67,
+        "offset": 428
+      },
+      "extra": {
+        "message": "By not specifying a USER, a program in the container may run as 'root'. This is a security hazard. If an attacker can control a process running as root, they may have control over the container. Ensure that the last USER in a Dockerfile is a USER other than 'root'.",
+        "fix": "USER non-root\nCMD [\"uvicorn\", \"main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8083\"]",
+        "metadata": {
+          "cwe": [
+            "CWE-250: Execution with Unnecessary Privileges"
+          ],
+          "category": "security",
+          "technology": [
+            "dockerfile"
+          ],
+          "confidence": "MEDIUM",
+          "owasp": [
+            "A04:2021 - Insecure Design"
+          ],
+          "references": [
+            "https://owasp.org/Top10/A04_2021-Insecure_Design"
+          ],
+          "subcategory": [
+            "audit"
+          ],
+          "likelihood": "LOW",
+          "impact": "MEDIUM",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Improper Authorization"
+          ],
+          "source": "https://semgrep.dev/r/dockerfile.security.missing-user.missing-user",
+          "shortlink": "https://sg.run/Gbvn"
+        },
+        "severity": "ERROR",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "dockerfile.security.missing-user.missing-user",
+      "path": "services/restaurant-service/Dockerfile",
+      "start": {
+        "line": 20,
+        "col": 1,
+        "offset": 362
+      },
+      "end": {
+        "line": 20,
+        "col": 67,
+        "offset": 428
+      },
+      "extra": {
+        "message": "By not specifying a USER, a program in the container may run as 'root'. This is a security hazard. If an attacker can control a process running as root, they may have control over the container. Ensure that the last USER in a Dockerfile is a USER other than 'root'.",
+        "fix": "USER non-root\nCMD [\"uvicorn\", \"main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8082\"]",
+        "metadata": {
+          "cwe": [
+            "CWE-250: Execution with Unnecessary Privileges"
+          ],
+          "category": "security",
+          "technology": [
+            "dockerfile"
+          ],
+          "confidence": "MEDIUM",
+          "owasp": [
+            "A04:2021 - Insecure Design"
+          ],
+          "references": [
+            "https://owasp.org/Top10/A04_2021-Insecure_Design"
+          ],
+          "subcategory": [
+            "audit"
+          ],
+          "likelihood": "LOW",
+          "impact": "MEDIUM",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Improper Authorization"
+          ],
+          "source": "https://semgrep.dev/r/dockerfile.security.missing-user.missing-user",
+          "shortlink": "https://sg.run/Gbvn"
+        },
+        "severity": "ERROR",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 3,
+      "level": "warn",
+      "type": "Syntax error",
+      "message": "Syntax error at line security_reports/semgrep-report.json:1:\n missing element",
+      "path": "security_reports/semgrep-report.json"
+    },
+    {
+      "code": 3,
+      "level": "warn",
+      "type": "Syntax error",
+      "message": "Syntax error at line security_reports/trivy-image.json:1:\n missing element",
+      "path": "security_reports/trivy-image.json"
+    }
+  ],
+  "paths": {
+    "scanned": [
+      ".gitignore",
+      ".secrets.baseline",
+      "README.md",
+      "deploy/gateway/nginx.conf",
+      "deploy/waf/Dockerfile",
+      "deploy/waf/modsecurity.conf",
+      "deploy/waf/nginx.conf",
+      "docker-compose.yml",
+      "security_reports/detect-secrets-baseline.json",
+      "security_reports/pip-audit.json",
+      "security_reports/semgrep-report.json",
+      "security_reports/trivy-image.json",
+      "services/frontend/.dockerignore",
+      "services/frontend/.eslintrc.cjs",
+      "services/frontend/.gitignore",
+      "services/frontend/Dockerfile",
+      "services/frontend/README.md",
+      "services/frontend/index.html",
+      "services/frontend/package.json",
+      "services/frontend/public/favicon.svg",
+      "services/frontend/src/App.tsx",
+      "services/frontend/src/api.ts",
+      "services/frontend/src/app.css",
+      "services/frontend/src/components/Layout.tsx",
+      "services/frontend/src/components/layout.css",
+      "services/frontend/src/index.css",
+      "services/frontend/src/main.tsx",
+      "services/frontend/src/types.ts",
+      "services/frontend/tsconfig.json",
+      "services/frontend/tsconfig.node.json",
+      "services/frontend/vite.config.ts",
+      "services/order-service/.dockerignore",
+      "services/order-service/Dockerfile",
+      "services/order-service/README.md",
+      "services/order-service/data/.gitkeep",
+      "services/order-service/main.py",
+      "services/order-service/order_service/__init__.py",
+      "services/order-service/order_service/app.py",
+      "services/order-service/order_service/database.py",
+      "services/order-service/order_service/payment_client.py",
+      "services/order-service/order_service/repository.py",
+      "services/order-service/order_service/restaurant_client.py",
+      "services/order-service/order_service/saga.py",
+      "services/order-service/order_service/schemas.py",
+      "services/order-service/requirements.txt",
+      "services/payment-service/.dockerignore",
+      "services/payment-service/Dockerfile",
+      "services/payment-service/README.md",
+      "services/payment-service/data/.gitkeep",
+      "services/payment-service/main.py",
+      "services/payment-service/payment_service/__init__.py",
+      "services/payment-service/payment_service/app.py",
+      "services/payment-service/payment_service/database.py",
+      "services/payment-service/payment_service/repository.py",
+      "services/payment-service/payment_service/schemas.py",
+      "services/payment-service/payment_service/service.py",
+      "services/payment-service/requirements.txt",
+      "services/restaurant-service/.dockerignore",
+      "services/restaurant-service/Dockerfile",
+      "services/restaurant-service/README.md",
+      "services/restaurant-service/data/.gitkeep",
+      "services/restaurant-service/data/restaurant.db",
+      "services/restaurant-service/main.py",
+      "services/restaurant-service/requirements.txt",
+      "services/restaurant-service/restaurant_service/__init__.py",
+      "services/restaurant-service/restaurant_service/__pycache__/__init__.cpython-311.pyc",
+      "services/restaurant-service/restaurant_service/__pycache__/app.cpython-311.pyc",
+      "services/restaurant-service/restaurant_service/__pycache__/database.cpython-311.pyc",
+      "services/restaurant-service/restaurant_service/__pycache__/repository.cpython-311.pyc",
+      "services/restaurant-service/restaurant_service/__pycache__/schemas.cpython-311.pyc",
+      "services/restaurant-service/restaurant_service/app.py",
+      "services/restaurant-service/restaurant_service/database.py",
+      "services/restaurant-service/restaurant_service/repository.py",
+      "services/restaurant-service/restaurant_service/schemas.py"
+    ]
+  },
+  "time": {
+    "rules": [],
+    "rules_parse_time": 1.172663927078247,
+    "profiling_times": {
+      "config_time": 3.285365343093872,
+      "core_time": 6.532276391983032,
+      "ignores_time": 0.00046253204345703125,
+      "total_time": 9.819149017333984
+    },
+    "parsing_time": {
+      "total_time": 0,
+      "per_file_time": {
+        "mean": 0,
+        "std_dev": 0
+      },
+      "very_slow_stats": {
+        "time_ratio": 0,
+        "count_ratio": 0
+      },
+      "very_slow_files": []
+    },
+    "scanning_time": {
+      "total_time": 3.000286340713501,
+      "per_file_time": {
+        "mean": 0.015708305448761783,
+        "std_dev": 0.0004617791438548931
+      },
+      "very_slow_stats": {
+        "time_ratio": 0,
+        "count_ratio": 0
+      },
+      "very_slow_files": []
+    },
+    "matching_time": {
+      "total_time": 0,
+      "per_file_and_rule_time": {
+        "mean": 0,
+        "std_dev": 0
+      },
+      "very_slow_stats": {
+        "time_ratio": 0,
+        "count_ratio": 0
+      },
+      "very_slow_rules_on_files": []
+    },
+    "tainting_time": {
+      "total_time": 0,
+      "per_def_and_rule_time": {
+        "mean": 0,
+        "std_dev": 0
+      },
+      "very_slow_stats": {
+        "time_ratio": 0,
+        "count_ratio": 0
+      },
+      "very_slow_rules_on_defs": []
+    },
+    "fixpoint_timeouts": [],
+    "prefiltering": {
+      "project_level_time": 0,
+      "file_level_time": 0,
+      "rules_with_project_prefilters_ratio": 0,
+      "rules_with_file_prefilters_ratio": 0.9866028708133971,
+      "rules_selected_ratio": 0.03779904306220096,
+      "rules_matched_ratio": 0.03779904306220096
+    },
+    "targets": [],
+    "total_bytes": 0,
+    "max_memory_bytes": 665062592
+  },
+  "engine_requested": "OSS",
+  "skipped_rules": []
+}

@@ -1,0 +1,231 @@
+.card {
+  background: #fff;
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.card__heading h2 {
+  margin: 0 0 0.2rem;
+  font-size: 1.4rem;
+}
+
+.card__heading p {
+  margin: 0;
+  color: #5f647a;
+}
+
+.restaurant-picker label,
+.status-panel label,
+.note-field {
+  font-size: 0.9rem;
+  color: #4a4f66;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-weight: 600;
+}
+
+.toggle-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #4a4f66;
+}
+
+.toggle-field input {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+select,
+input {
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.8rem;
+  border: 1px solid #e0e2ef;
+  font-size: 1rem;
+  background-color: #f9f9ff;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.menu-card {
+  background: #f7f7ff;
+  border-radius: 1rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.8rem;
+  border: 1px solid transparent;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.menu-card h3 {
+  margin: 0;
+}
+
+.menu-card p {
+  margin: 0;
+  color: #636578;
+  font-size: 0.9rem;
+}
+
+.menu-card:hover {
+  border-color: #c7c9ff;
+  transform: translateY(-2px);
+}
+
+.menu-card.disabled {
+  opacity: 0.5;
+}
+
+.menu-card__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+button {
+  border: none;
+  border-radius: 999px;
+  padding: 0.5rem 1.2rem;
+  cursor: pointer;
+  background: #eef0ff;
+}
+
+button.primary {
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: #fff;
+  font-weight: 600;
+}
+
+button.ghost {
+  border: 1px solid #d2d6f1;
+  background: transparent;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cart-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  background: #f8f8ff;
+  border-radius: 1rem;
+}
+
+.cart-item__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.order-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.muted {
+  color: #8b90ad;
+}
+
+.error {
+  color: #d14343;
+  font-weight: 600;
+}
+
+.success {
+  color: #0f9d58;
+  font-weight: 600;
+}
+
+.status-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.status-card {
+  border: 1px solid #e1e4ff;
+  border-radius: 1rem;
+  padding: 1rem;
+  background: #fefeff;
+}
+
+.status-card header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+.badge {
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+.badge--pending {
+  background: #fff7cc;
+  color: #7a6000;
+}
+
+.badge--confirmed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge--canceled {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.status-card dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.8rem;
+  margin: 0;
+}
+
+.status-card dt {
+  font-size: 0.85rem;
+  color: #8b90ad;
+}
+
+.status-card dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.overview-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.overview-list {
+  display: grid;
+  gap: 1rem;
+}
