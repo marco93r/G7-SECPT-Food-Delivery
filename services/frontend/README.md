@@ -19,11 +19,11 @@ npm run dev -- --open
 
 Standard-Umgebungsvariablen (können über `.env` oder CLI gesetzt werden):
 ```
-VITE_RESTAURANT_API=http://localhost:8082
-VITE_ORDER_API=http://localhost:8081
+VITE_RESTAURANT_API=https://localhost:8080
+VITE_ORDER_API=https://localhost:8080
 VITE_API_TOKEN=SECPT_TEST_TOKEN
 ```
-`VITE_API_TOKEN` wird automatisch als Header `X-API-Token` an jede API-Request angefügt, damit das Kong-Gateway / die WAF nur authentifizierte Aufrufe durchlässt.
+`VITE_API_TOKEN` wird automatisch als Header `X-API-Token` an jede API-Request angefügt, damit das Kong-Gateway / die WAF nur authentifizierte Aufrufe durchlässt. Da das Frontend standardmäßig den via WAF exponierten HTTPS-Endpunkt (`https://localhost:8080`) nutzt, muss im Browser das selbstsignierte Zertifikat (`deploy/waf/certs/dev.crt`) vertraut oder die Warnung bestätigt werden.
 
 ## Build & Preview
 ```bash
@@ -33,16 +33,19 @@ npm run preview
 
 ## Docker
 ```bash
-docker build -t mifos/frontend:dev services/frontend
-docker run --rm -p 4173:80 mifos/frontend:dev
+docker build -f services/frontend/Dockerfile -t mifos/frontend:dev .
+docker run --rm -p 4173:443 mifos/frontend:dev
 ```
+Der Container liefert die Assets ausschließlich per HTTPS aus (`https://localhost:4173`) und nutzt dasselbe selbstsignierte Zertifikat wie das WAF (`deploy/waf/certs/dev.crt`).
+
 Dabei können Build-Args gesetzt werden, um die API-Ziele anzupassen:
 ```bash
 docker build \
+  -f services/frontend/Dockerfile \
   --build-arg VITE_ORDER_API=http://order-service:8081 \
   --build-arg VITE_RESTAURANT_API=http://restaurant-service:8082 \
   --build-arg VITE_API_TOKEN=SECPT_TEST_TOKEN \
-  -t mifos/frontend:dev services/frontend
+  -t mifos/frontend:dev .
 ```
 
 ## Compose

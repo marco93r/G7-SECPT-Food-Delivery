@@ -9,7 +9,7 @@ Dieses Repository beherbergt die Microservices des miFOS-Systems. Die Architektu
 | `restaurant-service`| Menüs verwalten, Orders bestätigen    | _immer aktiv_  |
 | `order-service`     | Saga-Orchestrator                     | _immer aktiv_  |
 | `payment-service`   | Zahlungsabwicklung                    | `payment`      |
-| `frontend`          | React-App für Menüs & Orders          | `ui`           |
+| `frontend`          | React-App für Menüs & Orders (HTTPS)  | `ui`           |
 | `api-gateway`       | Kong Gateway (intern, via WAF erreichbar) | `edge`     |
 | `waf`               | ModSecurity/OWASP CRS vor dem Gateway | `edge`         |
 | `restaurant-db`     | Postgres für Restaurant-Service       | _immer aktiv_  |
@@ -36,16 +36,18 @@ Wichtige Umgebungsvariablen (z. B. in `.env`):
 PAYMENT_MODE=http
 PAYMENT_SERVICE_URL=http://payment-service:8083
 PAYMENT_FAILURE_MODE=authorize
-VITE_ORDER_API=http://localhost:8081          # oder http://localhost:8080/api/orders
-VITE_RESTAURANT_API=http://localhost:8082     # oder http://localhost:8080/api/restaurants
+VITE_ORDER_API=https://localhost:8080         # Frontdoor via WAF/Kong (TLS)
+VITE_RESTAURANT_API=https://localhost:8080    # dto.
 VITE_API_TOKEN=SECPT_TEST_TOKEN               # muss zum Kong-Key passen
 ```
 
-Im Edge-Profil läuft eine WAF vor dem Gateway; alle externen Aufrufe gehen über `http://localhost:8080` und benötigen den statischen Token `SECPT_TEST_TOKEN` (Header `X-API-Token`).
+Im Edge-Profil läuft eine WAF vor dem Gateway; alle externen Aufrufe gehen über `https://localhost:8080` und benötigen den statischen Token `SECPT_TEST_TOKEN` (Header `X-API-Token`). Das TLS-Zertifikat ist selbstsigniert (`deploy/waf/certs/dev.crt`). Entweder das Zertifikat lokal als CA vertrauen oder Tools wie `curl` mit `-k/--insecure` nutzen.
 ```bash
-curl -H "X-API-Token: SECPT_TEST_TOKEN" http://localhost:8080/api/restaurants/restaurants
-curl -H "X-API-Token: SECPT_TEST_TOKEN" http://localhost:8080/api/orders/healthz
+curl -k -H "X-API-Token: SECPT_TEST_TOKEN" https://localhost:8080/api/restaurants/restaurants
+curl -k -H "X-API-Token: SECPT_TEST_TOKEN" https://localhost:8080/api/orders/healthz
 ```
+
+Das Frontend im `ui`-Profil wird ebenfalls TLS-gesichert ausgeliefert (`https://localhost:4173`). Es nutzt dasselbe selbstsignierte Zertifikat. Entweder das Zertifikat (`deploy/waf/certs/dev.crt`) ins lokale Trust-Store importieren oder die Browser-Warnung bei erstem Aufruf bestätigen.
 
 ## Tests und Qualität
 - Jeder Service besitzt eigene Pytest-Suites (`services/<name>/tests`).

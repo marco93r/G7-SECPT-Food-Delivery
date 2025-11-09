@@ -10,16 +10,19 @@ ENV VITE_ORDER_API=$VITE_ORDER_API \
     VITE_RESTAURANT_API=$VITE_RESTAURANT_API \
     VITE_API_TOKEN=$VITE_API_TOKEN
 
-COPY package*.json ./
+COPY services/frontend/package*.json ./
 RUN npm install
 
-COPY . .
+COPY services/frontend .
 RUN npm run build
 
 FROM nginx:1.27-alpine
 
 COPY --from=build /app/dist /usr/share/nginx/html
+COPY services/frontend/nginx.conf /etc/nginx/nginx.conf
+COPY deploy/waf/certs /etc/nginx/certs
+RUN chmod 600 /etc/nginx/certs/*.key
 
-EXPOSE 80
+EXPOSE 443
 
 CMD ["nginx", "-g", "daemon off;"]

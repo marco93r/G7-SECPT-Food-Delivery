@@ -44,7 +44,7 @@ services:
       api-gateway:
         condition: service_started
     ports:
-      - "8080:80"
+      - "8080:443"
     networks:
       - app
 
@@ -104,7 +104,8 @@ services:
   frontend:
     profiles: ["ui"]
     build:
-      context: ./services/frontend
+      context: .
+      dockerfile: services/frontend/Dockerfile
       args:
         VITE_ORDER_API: ${VITE_ORDER_API:-http://order-service:8081}
         VITE_RESTAURANT_API: ${VITE_RESTAURANT_API:-http://restaurant-service:8082}
@@ -115,7 +116,7 @@ services:
       - restaurant-service
       - order-service
     ports:
-      - "4173:80"
+      - "4173:443"
     networks:
       - app
 
