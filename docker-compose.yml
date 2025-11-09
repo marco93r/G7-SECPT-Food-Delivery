@@ -17,12 +17,18 @@ services:
 
   api-gateway:
     profiles: ["edge"]
-    image: nginx:1.27-alpine
+    build:
+      context: ./deploy/gateway
+    image: mifos/api-gateway:dev
     container_name: api-gateway
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /etc/kong/kong.yaml
+      KONG_LOG_LEVEL: info
+      KONG_PROXY_LISTEN: "0.0.0.0:80"
+      KONG_ADMIN_LISTEN: "off"
     depends_on:
       - restaurant-service
-    volumes:
-      - ./deploy/gateway/nginx.conf:/etc/nginx/nginx.conf:ro
     expose:
       - "80"
     networks:
@@ -35,12 +41,26 @@ services:
     image: mifos/waf:dev
     container_name: waf
     depends_on:
-      - api-gateway
+      api-gateway:
+        condition: service_started
     ports:
       - "8080:80"
     networks:
-      - edge
       - app
+
+  # waf:
+  #   profiles: ["edge"]
+  #   build:
+  #     context: ./deploy/waf
+  #   image: mifos/waf:dev
+  #   container_name: waf
+  #   depends_on:
+  #     - api-gateway
+  #   ports:
+  #     - "8080:80"
+  #   networks:
+  #     - edge
+  #     - app
 
   order-service:
     build:
@@ -153,7 +173,7 @@ services:
       - app
 
 networks:
-  edge:
+  # edge:
   app:
 
 volumes:

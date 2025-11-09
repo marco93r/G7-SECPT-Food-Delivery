@@ -1,8 +1,11 @@
 FROM owasp/modsecurity-crs:nginx
 
-# Provide custom templates so the entrypoint can render them at runtime.
-COPY nginx.conf /etc/nginx/templates/nginx.conf.template
+USER root
 
-# CRS legt crs-setup.conf und Rules bereits im Image ab, daher reicht es,
-# unsere zusätzliche Konfiguration in das Template-Verzeichnis zu kopieren.
-COPY modsecurity.conf /etc/nginx/templates/modsecurity.d/modsecurity.conf.template
+RUN mkdir -p /opt/custom
+
+COPY nginx.conf /opt/custom/nginx.conf
+COPY docker-entrypoint.d/99-override-nginx.sh /docker-entrypoint.d/99-override-nginx.sh
+
+# Ensure runtime scripts can manage configs without permission issues
+RUN chmod +x /docker-entrypoint.d/99-override-nginx.sh

@@ -1,0 +1,39 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: restaurant-service
+    url: http://restaurant-service:8082
+    routes:
+      - name: restaurant-api
+        paths:
+          - /api/restaurants
+        strip_path: true
+      - name: restaurant-root
+        paths:
+          - /restaurants
+        strip_path: false
+
+  - name: order-service
+    url: http://order-service:8081
+    routes:
+      - name: order-api
+        paths:
+          - /api/orders
+        strip_path: true
+      - name: order-root
+        paths:
+          - /orders
+        strip_path: false
+
+  - name: payment-service
+    url: http://payment-service:8083
+    routes:
+      - name: payment-api
+        paths:
+          - /api/payments
+        strip_path: true
+      - name: payment-root
+        paths:
+          - /payments
+        strip_path: false
