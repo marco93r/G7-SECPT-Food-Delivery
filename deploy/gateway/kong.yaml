@@ -1,6 +1,11 @@
 _format_version: "3.0"
 _transform: true
 
+consumers:
+  - username: test-client
+    keyauth_credentials:
+      - key: SECPT_TEST_TOKEN
+
 services:
   - name: restaurant-service
     url: http://restaurant-service:8082
@@ -37,3 +42,11 @@ services:
         paths:
           - /payments
         strip_path: false
+
+plugins:
+  - name: key-auth
+    config:
+      key_names:
+        - X-API-Token
+      key_in_header: true
+      run_on_preflight: false

@@ -21,7 +21,9 @@ Standard-Umgebungsvariablen (können über `.env` oder CLI gesetzt werden):
 ```
 VITE_RESTAURANT_API=http://localhost:8082
 VITE_ORDER_API=http://localhost:8081
+VITE_API_TOKEN=SECPT_TEST_TOKEN
 ```
+`VITE_API_TOKEN` wird automatisch als Header `X-API-Token` an jede API-Request angefügt, damit das Kong-Gateway / die WAF nur authentifizierte Aufrufe durchlässt.
 
 ## Build & Preview
 ```bash
@@ -39,6 +41,7 @@ Dabei können Build-Args gesetzt werden, um die API-Ziele anzupassen:
 docker build \
   --build-arg VITE_ORDER_API=http://order-service:8081 \
   --build-arg VITE_RESTAURANT_API=http://restaurant-service:8082 \
+  --build-arg VITE_API_TOKEN=SECPT_TEST_TOKEN \
   -t mifos/frontend:dev services/frontend
 ```
 

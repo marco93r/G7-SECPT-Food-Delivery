@@ -38,12 +38,13 @@ PAYMENT_SERVICE_URL=http://payment-service:8083
 PAYMENT_FAILURE_MODE=authorize
 VITE_ORDER_API=http://localhost:8081          # oder http://localhost:8080/api/orders
 VITE_RESTAURANT_API=http://localhost:8082     # oder http://localhost:8080/api/restaurants
+VITE_API_TOKEN=SECPT_TEST_TOKEN               # muss zum Kong-Key passen
 ```
 
-Im Edge-Profil läuft eine WAF vor dem Gateway; alle externen Aufrufe gehen über `http://localhost:8080`:
+Im Edge-Profil läuft eine WAF vor dem Gateway; alle externen Aufrufe gehen über `http://localhost:8080` und benötigen den statischen Token `SECPT_TEST_TOKEN` (Header `X-API-Token`).
 ```bash
-curl http://localhost:8080/api/restaurants/restaurants
-curl http://localhost:8080/api/orders/healthz
+curl -H "X-API-Token: SECPT_TEST_TOKEN" http://localhost:8080/api/restaurants/restaurants
+curl -H "X-API-Token: SECPT_TEST_TOKEN" http://localhost:8080/api/orders/healthz
 ```
 
 ## Tests und Qualität
