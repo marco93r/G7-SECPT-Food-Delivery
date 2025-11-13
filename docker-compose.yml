@@ -1,60 +1,192 @@
 services:
-  frontend:
-    build: ./frontend
-    networks: [backend]
-
-  order-service:
-    build: ./services/order-service
-    environment:
-      - API_KEY=${API_KEY:-changeme}
-      - RESTAURANT_URL=http://restaurant-service:8001
-      - PAYMENT_URL=http://payment-service:8002
-      - DB_PATH=/data/order.db
-    volumes:
-      - order_data:/data
-    networks: [backend]
-
   restaurant-service:
-    build: ./services/restaurant-service
+    build:
+      context: ./services/restaurant-service
+    image: mifos/restaurant-service:dev
+    container_name: restaurant-service
+    depends_on:
+      restaurant-db:
+        condition: service_healthy
     environment:
-      - API_KEY=${API_KEY:-changeme}
-      - DB_PATH=/data/restaurant.db
-    volumes:
-      - restaurant_data:/data
-    networks: [backend]
-
-  payment-service:
-    build: ./services/payment-service
-    environment:
-      - API_KEY=${API_KEY:-changeme}
-      - DB_PATH=/data/payment.db
-      - PAYMENT_FAIL_AUTHORIZE=${PAYMENT_FAIL_AUTHORIZE:-false}
-    volumes:
-      - payment_data:/data
-    networks: [backend]
+      PORT: 8082
+      DATABASE_URL: postgresql://mifos:mifos@restaurant-db:5432/restaurant_service
+    ports:
+      - "8082:8082"
+    networks:
+      - app
 
   api-gateway:
-    build: ./api-gateway
-    depends_on: [order-service, restaurant-service, payment-service]
+    profiles: ["edge"]
+    build:
+      context: ./deploy/gateway
+    image: mifos/api-gateway:dev
+    container_name: api-gateway
     environment:
-      - API_KEY=${API_KEY:-changeme}
-    ports:
-      - "8081:8080"
-    networks: [backend]
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /etc/kong/kong.yaml
+      KONG_LOG_LEVEL: info
+      KONG_PROXY_LISTEN: "0.0.0.0:80"
+      KONG_ADMIN_LISTEN: "off"
+    depends_on:
+      - restaurant-service
+    expose:
+      - "80"
+    networks:
+      - app
 
   waf:
-    build: ./waf
-    depends_on: [frontend, api-gateway]
-    user: "0:0"
+    profiles: ["edge"]
+    build:
+      context: ./deploy/waf
+    image: mifos/waf:dev
+    container_name: waf
+    depends_on:
+      api-gateway:
+        condition: service_started
+      log-viewer:
+        condition: service_started
     ports:
-      - "8080:80"
-      - "8443:443"
-    networks: [backend]
+      - "8080:443"
+    volumes:
+      - waf-logs:/var/log/nginx
+    networks:
+      - app
 
-volumes:
-  order_data:
-  restaurant_data:
-  payment_data:
+  order-service:
+    build:
+      context: ./services/order-service
+    image: mifos/order-service:dev
+    container_name: order-service
+    depends_on:
+      restaurant-service:
+        condition: service_started
+      order-db:
+        condition: service_healthy
+    environment:
+      PORT: 8081
+      RESTAURANT_SERVICE_URL: http://restaurant-service:8082
+      PAYMENT_MODE: ${PAYMENT_MODE:-mock}
+      PAYMENT_SERVICE_URL: ${PAYMENT_SERVICE_URL:-http://payment-service:8083}
+      DATABASE_URL: postgresql://mifos:mifos@order-db:5432/order_service
+    ports:
+      - "8081:8081"
+    networks:
+      - app
+
+  log-viewer:
+    profiles: ["edge"]
+    build:
+      context: ./deploy/log-viewer
+    image: mifos/log-viewer:dev
+    container_name: log-viewer
+    environment:
+      LOG_USER: ${LOG_USER:-admin}
+      LOG_PASSWORD: ${LOG_PASSWORD:-admin}
+      LOG_DIR: /logs
+    volumes:
+      - waf-logs:/logs:ro
+    expose:
+      - "8080"
+    networks:
+      - app
+
+  payment-service:
+    profiles: ["payment"]
+    build:
+      context: ./services/payment-service
+    image: mifos/payment-service:dev
+    container_name: payment-service
+    depends_on:
+      payment-db:
+        condition: service_healthy
+    environment:
+      PORT: 8083
+      FAILURE_MODE: ${PAYMENT_FAILURE_MODE:-none}
+      DATABASE_URL: postgresql://mifos:mifos@payment-db:5432/payment_service
+    ports:
+      - "8083:8083"
+    networks:
+      - app
+
+  frontend:
+    profiles: ["ui"]
+    build:
+      context: .
+      dockerfile: services/frontend/Dockerfile
+      args:
+        VITE_ORDER_API: ${VITE_ORDER_API:-http://order-service:8081}
+        VITE_RESTAURANT_API: ${VITE_RESTAURANT_API:-http://restaurant-service:8082}
+        VITE_API_TOKEN: ${VITE_API_TOKEN:-}
+    image: mifos/frontend:dev
+    container_name: frontend
+    depends_on:
+      - restaurant-service
+      - order-service
+    ports:
+      - "4173:443"
+    networks:
+      - app
+
+  restaurant-db:
+    image: postgres:16-alpine
+    container_name: restaurant-db
+    environment:
+      POSTGRES_DB: restaurant_service
+      POSTGRES_USER: mifos
+      POSTGRES_PASSWORD: mifos
+    volumes:
+      - restaurant-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mifos -d restaurant_service"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    networks:
+      - app
+
+  order-db:
+    image: postgres:16-alpine
+    container_name: order-db
+    environment:
+      POSTGRES_DB: order_service
+      POSTGRES_USER: mifos
+      POSTGRES_PASSWORD: mifos
+    volumes:
+      - order-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mifos -d order_service"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    networks:
+      - app
+
+  payment-db:
+    image: postgres:16-alpine
+    container_name: payment-db
+    environment:
+      POSTGRES_DB: payment_service
+      POSTGRES_USER: mifos
+      POSTGRES_PASSWORD: mifos
+    volumes:
+      - payment-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mifos -d payment_service"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+    networks:
+      - app
 
 networks:
-  backend:
+  # edge:
+  app:
+
+volumes:
+  restaurant-db-data:
+  order-db-data:
+  payment-db-data:
+  waf-logs:

@@ -1,124 +1,68 @@
-# G7-SECPT-Food-Delivery
+# miFOS - Microservice Food Order System
 
-Microservice‑Prototyp einer Food‑Delivery‑Plattform mit drei unabhängigen Services (Order, Restaurant, Payment), Orchestrierung per Saga‑Muster, API‑Gateway (NGINX) und vorgeschalteter WAF (ModSecurity + OWASP CRS). Jeder Service hat eine eigene Datenhaltung (SQLite). Die gesamte Lösung ist per Docker Compose containerisiert.
+Dieses Repository beherbergt die Microservices des miFOS-Systems. Die Architektur wird Schritt für Schritt aufgebaut: Zunächst stehen die Kernservices (Restaurant und Order) im Fokus. Zusätzliche Komponenten (Frontend, Payment, Kong Gateway) lassen sich über Docker-Compose-Profile zuschalten. Jede Domäne besitzt eine eigene Postgres-Datenbank.
 
-## Architektur
-- WAF: ModSecurity mit OWASP CRS, HTTPS‑Termination (Self‑Signed), filtert eingehenden Traffic und leitet an das API‑Gateway weiter
-- API‑Gateway: NGINX‑Routing zu den Services, prüft API‑Key
-- Order‑Service: Orchestrator des Bestellprozesses (Saga, Kompensation)
-- Restaurant‑Service: Menüs und Reservierung/Storno
-- Payment‑Service: Autorisierung, Capture, Refund; Failure‑Toggle für Tests
-- Datenbanken: je Service eine SQLite‑DB unter `/data` (Volumes)
+## Services & Profile
 
-Eintrittspunkte lokal:
-- `https://localhost:8443` (WAF, inkl. Frontend, TLS via Self‑Signed)
-- `http://localhost:8080` (WAF HTTP – leitet automatisch auf HTTPS um)
-- `http://localhost:8081` (direkt zum API‑Gateway, ohne WAF, für Diagnose)
+| Dienst              | Zweck                                 | Compose-Profil |
+|---------------------|---------------------------------------|----------------|
+| `restaurant-service`| Menüs verwalten, Orders bestätigen    | _immer aktiv_  |
+| `order-service`     | Saga-Orchestrator                     | _immer aktiv_  |
+| `payment-service`   | Zahlungsabwicklung                    | `payment`      |
+| `frontend`          | React-App für Menüs & Orders (HTTPS)  | `ui`           |
+| `api-gateway`       | Kong Gateway (intern, via WAF erreichbar) | `edge`     |
+| `waf`               | ModSecurity/OWASP CRS vor dem Gateway | `edge`         |
+| `log-viewer`        | Einfacher Log-Viewer (Basic Auth)     | `edge`         |
+| `restaurant-db`     | Postgres für Restaurant-Service       | _immer aktiv_  |
+| `order-db`          | Postgres für Order-Service            | _immer aktiv_  |
+| `payment-db`        | Postgres für Payment-Service          | `payment`      |
 
-Auth: Einfache API‑Key‑Prüfung über Header `X-API-Key` (Default: `changeme`). Der API‑Key wird am API‑Gateway validiert; Services prüfen zusätzlich (Defense in Depth).
+## Container starten
 
-## Schnellstart
-Voraussetzungen: Docker, Docker Compose.
-
-1) Standard‑Start (ohne Fehler‑Simulation)
-
-```
+Basis-Setup (Restaurant + Order inkl. Datenbanken):
+```bash
 docker compose up --build
 ```
 
-- Health‑Check: `https://localhost:8443/healthz` (Self‑Signed; Browser/`curl -k` akzeptieren)
-
-2) Fault‑Tolerance‑Profil (FT‑01: Autorisierung schlägt fehl)
-
-```
-docker compose -f docker-compose.yml -f docker-compose.ft.yml up --build
-```
-
-Dieses Profil setzt `PAYMENT_FAIL_AUTHORIZE=true` im Payment‑Service.
-
-Optional: Eigenen API‑Key setzen
-
-- `set API_KEY=mein-key` (PowerShell: `$env:API_KEY="mein-key"`) vor `docker compose up`
-- Bei allen Requests Header `X-API-Key: mein-key` mitschicken
-
-## Frontend
-Das Frontend (statische SPA) wird über die WAF ausgeliefert:
-- Hauptseite: `https://localhost:8443/`
-- Checks/Diagnose: `https://localhost:8443/checks.html`
-
-Hauptseite:
-- API‑Key setzen (in `localStorage` gespeichert)
-- Menüs laden, Warenkorb füllen, Bestellung auslösen, Bestellstatus prüfen
-
-Checks‑Seite:
-- Health‑Checks: WAF `/healthz`, Services via Gateway `/api/*/healthz`
-- API‑Checks: Menüs abrufen und Demo‑Bestellung absetzen
-
-## Endpunkte (Gateway → Services)
-- `GET /api/restaurants/menus` → Restaurant: Menüs abrufen
-- `POST /api/orders/orders` → Order: Bestellung anlegen und Saga ausführen
-- `GET /api/orders/orders/{id}` → Order: Bestellstatus abfragen
-
-Healthchecks:
-- `GET /healthz` (WAF; HTTP/80 leitet sonst auf HTTPS um)
-- `GET /api/orders/healthz`, `GET /api/restaurants/healthz`, `GET /api/payments/healthz` (direkt via Gateway)
-
-Header immer setzen: `X-API-Key: <API_KEY>`
-
-## Beispiel‑Requests
-1) Menüs abrufen
-
-```
-curl -k -H "X-API-Key: changeme" https://localhost:8443/api/restaurants/menus
+Zusätzliche Profile:
+```bash
+docker compose --profile edge up --build          # WAF (Port 8080) + Kong
+docker compose --profile payment up --build       # Payment-Service (+ DB)
+docker compose --profile ui up --build            # Frontend
+docker compose --profile edge --profile ui --profile payment up --build  # Alles zusammen
 ```
 
-2) Bestellung anlegen (Erfolgsfall ohne FT‑Profil)
-
-```
-curl -k -X POST https://localhost:8443/api/orders/orders \
-  -H "Content-Type: application/json" \
-  -H "X-API-Key: changeme" \
-  -d '{
-    "customer_id": "c-123",
-    "items": [
-      {"name": "Pizza Margherita", "price": 10.5, "quantity": 1},
-      {"name": "Caesar Salad", "price": 8.5, "quantity": 1}
-    ]
-  }'
+Wichtige Umgebungsvariablen (z. B. in `.env`):
+```bash
+PAYMENT_MODE=http
+PAYMENT_SERVICE_URL=http://payment-service:8083
+PAYMENT_FAILURE_MODE=authorize
+VITE_ORDER_API=https://localhost:8080         # Frontdoor via WAF/Kong (TLS)
+VITE_RESTAURANT_API=https://localhost:8080    # dto.
+VITE_API_TOKEN=SECPT_TEST_TOKEN               # muss zum Kong-Key passen
+LOG_USER=admin
+LOG_PASSWORD=admin
 ```
 
-3) Status abfragen
-
-```
-curl -k -H "X-API-Key: changeme" https://localhost:8443/api/orders/orders/<order_id>
-```
-
-## Fault‑Tolerance‑Test FT‑01
-Ziel: Zahlungsauthorisierung schlägt fehl, Kompensation greift (Storno im Restaurant) und Bestellung wird `CANCELED`.
-
-1. Start mit FT‑Compose‑Datei (siehe oben)
-2. Bestellung anlegen (wie oben). Der Payment‑Service liefert `status: FAILED` bei `/authorize`.
-3. Erwartet: Order‑Service kompensiert – Restaurant‑Storno, Bestellung `CANCELED`.
-4. Status prüfen:
-
-```
-curl -k -H "X-API-Key: changeme" https://localhost:8443/api/orders/orders/<order_id>
+Im Edge-Profil läuft eine WAF vor dem Gateway; alle externen Aufrufe gehen über `https://localhost:8080` und benötigen den statischen Token `SECPT_TEST_TOKEN` (Header `X-API-Token`). Das TLS-Zertifikat ist selbstsigniert (`deploy/waf/certs/dev.crt`). Entweder das Zertifikat lokal als CA vertrauen oder Tools wie `curl` mit `-k/--insecure` nutzen.
+```bash
+curl -k -H "X-API-Token: SECPT_TEST_TOKEN" https://localhost:8080/api/restaurants/restaurants
+curl -k -H "X-API-Token: SECPT_TEST_TOKEN" https://localhost:8080/api/orders/healthz
 ```
 
-## Projektstruktur
-- `services/order-service`: FastAPI + SQLite, Orchestrierung/Saga
-- `services/restaurant-service`: FastAPI + SQLite, Menüs + Reservierungen
-- `services/payment-service`: FastAPI + SQLite, Zahlung (Authorize/Capture/Refund), Toggle `PAYMENT_FAIL_AUTHORIZE`
-- `api-gateway`: NGINX Config und Image (API‑Key‑Prüfung)
-- `waf`: NGINX mit ModSecurity + OWASP CRS, TLS‑Termination
-- `docker-compose.yml`: Basis‑Setup inkl. WAF/Gateway/Services
-- `docker-compose.ft.yml`: FT‑Profil (Authorize‑Fehler aktiv)
+Das Frontend im `ui`-Profil wird ebenfalls TLS-gesichert ausgeliefert (`https://localhost:4173`). Es nutzt dasselbe selbstsignierte Zertifikat. Entweder das Zertifikat (`deploy/waf/certs/dev.crt`) ins lokale Trust-Store importieren oder die Browser-Warnung bei erstem Aufruf bestätigen.
 
-## Sicherheit
-- WAF filtert eingehende Requests (SQLi, XSS etc.) und terminiert TLS.
-- API‑Gateway bündelt externe Zugriffe und prüft den API‑Key.
-- Services verlangen API‑Key zusätzlich (Defense in Depth).
-- Saga implementiert Kompensation für Payment‑Authorize‑Fehler (FT‑01) sowie nachgelagert für Capture‑Fehler.
+### Log Viewer & Korrelierbare Requests
 
-## Hinweise
-- SQLite ist für den Prototyp gewählt. In Produktion je Service eine dedizierte DB‑Instanz (z. B. Postgres) verwenden.
+- Unter `https://localhost:8080/logs` steht ein geschützter Log-Viewer bereit (Basic Auth `admin/admin`). Der Link ist auch im Frontend (Button „Logs“) sichtbar – so lässt sich demonstrieren, dass Logging/Observability Teil des Security-Ansatzes ist.
+- Der Viewer bezieht die letzten 200 Zeilen aus den WAF-Access- und Error-Logs. Durch die gemeinsam genutzte `waf-logs`-Volume können weitere Tools die Daten ebenfalls konsumieren.
+
+## Tests und Qualität
+- Jeder Service besitzt eigene Pytest-Suites (`services/<name>/tests`).
+- Sicherheitsberichte liegen unter `security_reports/` (semgrep, detect-secrets, pip-audit).
+- Für DAST-Scans kann z. B. OWASP ZAP gegen `http://localhost:8080` gefahren werden (siehe `security_reports/README.md`).
+
+## Nächste Schritte
+1. End-to-End-Flows über `docker compose --profile ui --profile payment --profile edge up --build` testen (inkl. Saga-Simulation via Checkbox im Frontend).
+2. Fehlerfall FT-01 prüfen: `PAYMENT_FAILURE_MODE=authorize` oder Frontend-Checkbox aktivieren; in der Bestellübersicht muss der Status `CANCELED` samt Failure Reason erscheinen.
+3. CI/CD erweitern, sodass die neuen Postgres-Container und Profile automatisiert gebaut und getestet werden.

@@ -1,0 +1,72 @@
+.page-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-shell__hero {
+  padding: 3rem clamp(1rem, 5vw, 4rem);
+  color: #0b1021;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  border-bottom-left-radius: 2rem;
+  border-bottom-right-radius: 2rem;
+  box-shadow: 0 25px 45px rgba(99, 102, 241, 0.3);
+}
+
+.page-shell__hero h1 {
+  margin: 0.2rem 0 0.6rem;
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: #fff;
+}
+
+.page-shell__hero .lead {
+  max-width: 640px;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+}
+
+.page-shell__actions {
+  margin-top: 1.5rem;
+}
+
+.page-shell__link-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(15, 23, 42, 0.25);
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.page-shell__link-button:hover {
+  background: rgba(15, 23, 42, 0.45);
+  transform: translateY(-1px);
+}
+
+.eyebrow {
+  letter-spacing: 0.3rem;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+.page-shell__content {
+  flex: 1;
+  padding: clamp(1rem, 4vw, 3rem);
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  margin-top: -3rem;
+}
+
+.page-shell__footer {
+  padding: 1.5rem clamp(1rem, 5vw, 4rem);
+  text-align: center;
+  color: #5f647a;
+}
