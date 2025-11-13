@@ -43,24 +43,14 @@ services:
     depends_on:
       api-gateway:
         condition: service_started
+      log-viewer:
+        condition: service_started
     ports:
       - "8080:443"
+    volumes:
+      - waf-logs:/var/log/nginx
     networks:
       - app
-
-  # waf:
-  #   profiles: ["edge"]
-  #   build:
-  #     context: ./deploy/waf
-  #   image: mifos/waf:dev
-  #   container_name: waf
-  #   depends_on:
-  #     - api-gateway
-  #   ports:
-  #     - "8080:80"
-  #   networks:
-  #     - edge
-  #     - app
 
   order-service:
     build:
@@ -80,6 +70,23 @@ services:
       DATABASE_URL: postgresql://mifos:mifos@order-db:5432/order_service
     ports:
       - "8081:8081"
+    networks:
+      - app
+
+  log-viewer:
+    profiles: ["edge"]
+    build:
+      context: ./deploy/log-viewer
+    image: mifos/log-viewer:dev
+    container_name: log-viewer
+    environment:
+      LOG_USER: ${LOG_USER:-admin}
+      LOG_PASSWORD: ${LOG_PASSWORD:-admin}
+      LOG_DIR: /logs
+    volumes:
+      - waf-logs:/logs:ro
+    expose:
+      - "8080"
     networks:
       - app
 
@@ -182,3 +189,4 @@ volumes:
   restaurant-db-data:
   order-db-data:
   payment-db-data:
+  waf-logs:

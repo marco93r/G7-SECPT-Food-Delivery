@@ -25,6 +25,8 @@ VITE_API_TOKEN=SECPT_TEST_TOKEN
 ```
 `VITE_API_TOKEN` wird automatisch als Header `X-API-Token` an jede API-Request angefügt, damit das Kong-Gateway / die WAF nur authentifizierte Aufrufe durchlässt. Da das Frontend standardmäßig den via WAF exponierten HTTPS-Endpunkt (`https://localhost:8080`) nutzt, muss im Browser das selbstsignierte Zertifikat (`deploy/waf/certs/dev.crt`) vertraut oder die Warnung bestätigt werden.
 
+Ein zusätzlicher „Logs“-Button im Header öffnet den Sidecar-Logviewer (`https://localhost:8080/logs`, Basic Auth `admin/admin`).
+
 ## Build & Preview
 ```bash
 npm run build

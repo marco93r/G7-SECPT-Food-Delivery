@@ -12,6 +12,7 @@ Dieses Repository beherbergt die Microservices des miFOS-Systems. Die Architektu
 | `frontend`          | React-App für Menüs & Orders (HTTPS)  | `ui`           |
 | `api-gateway`       | Kong Gateway (intern, via WAF erreichbar) | `edge`     |
 | `waf`               | ModSecurity/OWASP CRS vor dem Gateway | `edge`         |
+| `log-viewer`        | Einfacher Log-Viewer (Basic Auth)     | `edge`         |
 | `restaurant-db`     | Postgres für Restaurant-Service       | _immer aktiv_  |
 | `order-db`          | Postgres für Order-Service            | _immer aktiv_  |
 | `payment-db`        | Postgres für Payment-Service          | `payment`      |
@@ -39,6 +40,8 @@ PAYMENT_FAILURE_MODE=authorize
 VITE_ORDER_API=https://localhost:8080         # Frontdoor via WAF/Kong (TLS)
 VITE_RESTAURANT_API=https://localhost:8080    # dto.
 VITE_API_TOKEN=SECPT_TEST_TOKEN               # muss zum Kong-Key passen
+LOG_USER=admin
+LOG_PASSWORD=admin
 ```
 
 Im Edge-Profil läuft eine WAF vor dem Gateway; alle externen Aufrufe gehen über `https://localhost:8080` und benötigen den statischen Token `SECPT_TEST_TOKEN` (Header `X-API-Token`). Das TLS-Zertifikat ist selbstsigniert (`deploy/waf/certs/dev.crt`). Entweder das Zertifikat lokal als CA vertrauen oder Tools wie `curl` mit `-k/--insecure` nutzen.
@@ -48,6 +51,11 @@ curl -k -H "X-API-Token: SECPT_TEST_TOKEN" https://localhost:8080/api/orders/hea
 ```
 
 Das Frontend im `ui`-Profil wird ebenfalls TLS-gesichert ausgeliefert (`https://localhost:4173`). Es nutzt dasselbe selbstsignierte Zertifikat. Entweder das Zertifikat (`deploy/waf/certs/dev.crt`) ins lokale Trust-Store importieren oder die Browser-Warnung bei erstem Aufruf bestätigen.
+
+### Log Viewer & Korrelierbare Requests
+
+- Unter `https://localhost:8080/logs` steht ein geschützter Log-Viewer bereit (Basic Auth `admin/admin`). Der Link ist auch im Frontend (Button „Logs“) sichtbar – so lässt sich demonstrieren, dass Logging/Observability Teil des Security-Ansatzes ist.
+- Der Viewer bezieht die letzten 200 Zeilen aus den WAF-Access- und Error-Logs. Durch die gemeinsam genutzte `waf-logs`-Volume können weitere Tools die Daten ebenfalls konsumieren.
 
 ## Tests und Qualität
 - Jeder Service besitzt eigene Pytest-Suites (`services/<name>/tests`).
